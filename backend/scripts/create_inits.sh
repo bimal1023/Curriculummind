@@ -1,0 +1,14 @@
+touch /home/claude/curriculummind/agents/__init__.py
+touch /home/claude/curriculummind/orchestrator/__init__.py
+touch /home/claude/curriculummind/api/__init__.py
+touch /home/claude/curriculummind/api/routers/__init__.py
+touch /home/claude/curriculummind/api/schemas/__init__.py
+touch /home/claude/curriculummind/api/middleware/__init__.py
+touch /home/claude/curriculummind/core/__init__.py
+touch /home/claude/curriculummind/services/__init__.py
+touch /home/claude/curriculummind/services/search/__init__.py
+touch /home/claude/curriculummind/services/memory/__init__.py
+touch /home/claude/curriculummind/services/tools/__init__.py
+touch /home/claude/curriculummind/tests/__init__.py
+touch /home/claude/curriculummind/tests/unit/__init__.py
+touch /home/claude/curriculummind/tests/integration/__init__.py

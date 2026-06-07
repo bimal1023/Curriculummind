@@ -1,0 +1,19 @@
+{
+  "student_id": "student_demo_001",
+  "name": "Bimal Thapa",
+  "goal": "Pass the AZ-900 Microsoft Azure Fundamentals exam in 6 weeks and understand core cloud concepts",
+  "target_deadline_weeks": 6,
+  "hours_per_week": 10,
+  "assessment_results": [
+    { "topic": "Cloud concepts", "score": 55, "total_questions": 20 },
+    { "topic": "Azure architecture", "score": 40, "total_questions": 25 },
+    { "topic": "Azure services overview", "score": 48, "total_questions": 30 },
+    { "topic": "Security and compliance", "score": 35, "total_questions": 20 },
+    { "topic": "Pricing and support", "score": 60, "total_questions": 15 }
+  ],
+  "prior_courses": [
+    "AWS Cloud Practitioner Essentials",
+    "Python for Data Science"
+  ],
+  "preferred_resource_types": ["official_docs", "video", "practice"]
+}
