@@ -10,6 +10,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from core.models import (
+    AgentThought,
     AssessmentResult,
     CuratedContent,
     GapAnalysis,
@@ -40,6 +41,7 @@ class StudyPlanResponse(BaseModel):
     milestone_plan: PacedPlan
     resources: CuratedContent
     verification: VerificationResult
+    reasoning_trace: list[AgentThought] = []
     generation_metadata: dict[str, Any]
 
     model_config = {"from_attributes": True}

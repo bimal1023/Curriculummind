@@ -1,10 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import GapCard from "./GapCard";
 import MilestoneCard from "./MilestoneCard";
 import ResourceCard from "./ResourceCard";
 import SectionHeading from "./SectionHeading";
+import ReasoningTrace from "./ReasoningTrace";
+import CopyPlanButton from "./CopyPlanButton";
+import { loadChecked, saveChecked, objectiveKey } from "@/lib/progress";
 
 function VerificationBanner({ verification }) {
   const approved = verification?.status === "approved";
@@ -61,17 +65,56 @@ export default function Results({ plan, onReset }) {
   const byGap = plan?.resources?.by_gap || {};
   const meta = plan?.generation_metadata || {};
 
+  // ── Weekly checklist progress (persisted to localStorage by goal) ──────────
+  const namespace = plan?.goal || "";
+  const [checked, setChecked] = useState(() => new Set());
+
+  useEffect(() => {
+    setChecked(loadChecked(namespace));
+  }, [namespace]);
+
+  const isChecked = (key) => checked.has(key);
+
+  const toggle = (key) => {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      saveChecked(namespace, next);
+      return next;
+    });
+  };
+
+  const totalObjectives = milestones.reduce(
+    (sum, m) => sum + (m.objectives?.length || 0),
+    0
+  );
+  const doneObjectives = milestones.reduce(
+    (sum, m) =>
+      sum +
+      (m.objectives || []).filter((o, i) =>
+        checked.has(objectiveKey(m.week, i, o))
+      ).length,
+    0
+  );
+  const pct =
+    totalObjectives > 0
+      ? Math.round((doneObjectives / totalObjectives) * 100)
+      : 0;
+
   return (
     <div className="relative z-[2] mx-auto max-w-6xl px-5 py-10">
       {/* Bar */}
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between gap-3">
         <Logo />
-        <button
-          onClick={onReset}
-          className="rounded-full border border-pin-line bg-white px-4 py-2 text-xs font-bold text-pin-ink shadow-sm transition hover:border-pin-red hover:text-pin-red"
-        >
-          ← New board
-        </button>
+        <div className="flex items-center gap-2">
+          <CopyPlanButton plan={plan} />
+          <button
+            onClick={onReset}
+            className="rounded-full border border-pin-line bg-white px-4 py-2 text-xs font-bold text-pin-ink shadow-sm transition hover:border-pin-red hover:text-pin-red"
+          >
+            ← New board
+          </button>
+        </div>
       </header>
 
       {/* Hero summary */}
@@ -102,6 +145,13 @@ export default function Results({ plan, onReset }) {
         <VerificationBanner verification={plan.verification} />
       </section>
 
+      {/* Reasoning trace — the multi-step thinking behind the plan */}
+      {plan.reasoning_trace?.length > 0 && (
+        <section className="mt-12">
+          <ReasoningTrace trace={plan.reasoning_trace} />
+        </section>
+      )}
+
       {/* Gaps — masonry board */}
       {gaps.length > 0 && (
         <section className="mt-16">
@@ -124,7 +174,7 @@ export default function Results({ plan, onReset }) {
         </section>
       )}
 
-      {/* Milestones — timeline */}
+      {/* Milestones — timeline with tick-off checklist */}
       {milestones.length > 0 && (
         <section className="mt-16">
           <SectionHeading
@@ -132,6 +182,41 @@ export default function Results({ plan, onReset }) {
             title="Your week-by-week path"
             count={`${milestones.length} wks`}
           />
+
+          {/* Overall progress tracker */}
+          {totalObjectives > 0 && (
+            <div className="mb-7 rounded-4xl border border-pin-line bg-white p-5 shadow-pin sm:p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-display text-lg font-extrabold">
+                    {pct === 100 ? "🎉 Plan complete!" : "Your progress"}
+                  </p>
+                  <p className="text-sm text-pin-muted">
+                    {doneObjectives} of {totalObjectives} objectives done — tick
+                    them off as you study
+                  </p>
+                </div>
+                <span
+                  className={`grid h-14 w-14 shrink-0 place-items-center rounded-full font-display text-lg font-extrabold ${
+                    pct === 100
+                      ? "bg-emerald-500 text-white"
+                      : "bg-pin-red/10 text-pin-red"
+                  }`}
+                >
+                  {pct}%
+                </span>
+              </div>
+              <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-pin-surface">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    pct === 100 ? "bg-emerald-500" : "bg-pin-red"
+                  }`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-5">
             {milestones.map((m, i) => (
               <MilestoneCard
@@ -139,6 +224,8 @@ export default function Results({ plan, onReset }) {
                 milestone={m}
                 index={i}
                 last={i === milestones.length - 1}
+                isChecked={isChecked}
+                onToggle={toggle}
               />
             ))}
           </div>

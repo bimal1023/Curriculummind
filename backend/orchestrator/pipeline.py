@@ -24,7 +24,7 @@ from agents.goal_planner import GoalPlanner
 from agents.pace_reasoner import PaceReasoner
 from agents.verifier import Verifier
 from core.logging import get_logger
-from core.models import StudentProfile, StudyPlan, VerificationStatus
+from core.models import AgentThought, StudentProfile, StudyPlan, VerificationStatus
 
 logger = get_logger(__name__)
 
@@ -51,9 +51,21 @@ class CurriculumPipeline:
         start = time.monotonic()
         logger.info("pipeline_started", student_id=profile.student_id, goal=profile.goal)
 
+        # The reasoning trace records each agent's thinking as the pipeline
+        # runs, so the client can show the multi-step reasoning behind a plan.
+        trace: list[AgentThought] = []
+
         # ── Stage 1: Diagnose ─────────────────────────────────────────────────
         gap_analysis = await self._diagnostic.analyze({"student_profile": profile})
         logger.info("diagnostic_done", gap_count=len(gap_analysis.gaps))
+        high = sum(1 for g in gap_analysis.gaps if g.severity == "high")
+        trace.append(AgentThought(
+            step=1,
+            agent="DiagnosticAnalyzer",
+            role="Pinpoints knowledge gaps from your diagnostic scores",
+            summary=f"Identified {len(gap_analysis.gaps)} gap(s), {high} high-priority",
+            reasoning=gap_analysis.reasoning,
+        ))
 
         # ── Stage 2: Plan milestones ──────────────────────────────────────────
         milestone_plan = await self._planner.plan({
@@ -61,6 +73,13 @@ class CurriculumPipeline:
             "gap_analysis": gap_analysis,
         })
         logger.info("planning_done", milestone_count=len(milestone_plan.milestones))
+        trace.append(AgentThought(
+            step=2,
+            agent="GoalPlanner",
+            role="Sequences week-by-week milestones that close each gap",
+            summary=f"Drafted {len(milestone_plan.milestones)} milestone(s) in prerequisite order",
+            reasoning=milestone_plan.reasoning,
+        ))
 
         # ── Stage 3: Curate + Pace in parallel ───────────────────────────────
         curated_content, paced_plan = await asyncio.gather(
@@ -79,6 +98,22 @@ class CurriculumPipeline:
             resource_groups=len(curated_content.by_gap),
             adjustments=len(paced_plan.adjustments_made),
         )
+        trace.append(AgentThought(
+            step=3,
+            agent="ContentCurator",
+            role="Selects the best learning resources for each gap",
+            summary=f"Curated resources across {len(curated_content.by_gap)} gap area(s)",
+            reasoning=curated_content.reasoning,
+            parallel=True,
+        ))
+        trace.append(AgentThought(
+            step=4,
+            agent="PaceReasoner",
+            role="Adjusts the plan to fit your available study hours",
+            summary=f"Made {len(paced_plan.adjustments_made)} pacing adjustment(s)",
+            reasoning=paced_plan.reasoning,
+            parallel=True,
+        ))
 
         # ── Stage 4: Verify ───────────────────────────────────────────────────
         verification_ctx: dict[str, Any] = {
@@ -121,6 +156,19 @@ class CurriculumPipeline:
                     issues=verification.issues,
                 )
 
+        approved = verification.status == VerificationStatus.APPROVED
+        trace.append(AgentThought(
+            step=5,
+            agent="Verifier",
+            role="Audits the plan for prerequisite and coverage issues",
+            summary=(
+                "Approved — the plan is logically sound"
+                if approved
+                else f"Flagged {len(verification.issues)} issue(s) after one correction pass"
+            ),
+            reasoning=verification.reasoning,
+        ))
+
         elapsed = round(time.monotonic() - start, 2)
         logger.info("pipeline_completed", student_id=profile.student_id, elapsed_s=elapsed)
 
@@ -131,6 +179,7 @@ class CurriculumPipeline:
             milestone_plan=paced_plan,
             resources=curated_content,
             verification=verification,
+            reasoning_trace=trace,
             generation_metadata={
                 "elapsed_seconds": elapsed,
                 "agent_count": 5,

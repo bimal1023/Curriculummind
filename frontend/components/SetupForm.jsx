@@ -5,7 +5,7 @@ import { RESOURCE_TYPES } from "@/lib/api";
 import Logo from "./Logo";
 
 const SAMPLE = {
-  name: "Bimal Thapa",
+  name: "Jyoti Jirel",
   goal: "Pass the AZ-900 Microsoft Azure Fundamentals exam in 6 weeks and understand core cloud concepts",
   target_deadline_weeks: 6,
   hours_per_week: 10,
@@ -144,7 +144,7 @@ export default function SetupForm({ onSubmit, error }) {
               className={field}
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
-              placeholder="Bimal Thapa"
+              placeholder="Jyoti Jirel"
               required
             />
           </div>

@@ -108,6 +108,22 @@ class VerificationResult(BaseModel):
     reasoning: str
 
 
+# ── Reasoning trace ───────────────────────────────────────────────────────────
+
+class AgentThought(BaseModel):
+    """One agent's step in the pipeline — what it did and why.
+
+    Surfaced in the API response so clients can show the multi-step reasoning
+    behind a plan, not just the final output.
+    """
+    step: int
+    agent: str
+    role: str               # one-line description of the agent's job
+    summary: str            # what it concluded this run (e.g. "Found 3 gaps")
+    reasoning: str          # the agent's own narrative
+    parallel: bool = False  # True if it ran concurrently with the previous step
+
+
 # ── Final output ──────────────────────────────────────────────────────────────
 
 class StudyPlan(BaseModel):
@@ -117,4 +133,5 @@ class StudyPlan(BaseModel):
     milestone_plan: PacedPlan
     resources: CuratedContent
     verification: VerificationResult
+    reasoning_trace: list[AgentThought] = Field(default_factory=list)
     generation_metadata: dict[str, Any] = Field(default_factory=dict)

@@ -16,26 +16,43 @@ from services.search.azure_search import AzureSearchService
 class ContentCurator(BaseAgent):
     name = "ContentCurator"
     instructions = """
-You are a learning resource specialist. You receive gaps, milestones, and a list of
-candidate resources retrieved from a knowledge base.
+You are a learning resource specialist. You receive knowledge gaps and must recommend
+the best 2-3 real, working resources per gap.
 
-For each gap, select the 2-3 BEST resources. Prioritise:
-1. Official documentation / authoritative sources
-2. Structured video courses
-3. Practice problems / hands-on labs
-4. Articles / books
+CRITICAL URL RULES — you MUST follow these exactly:
+- Only use URLs you are 100% certain still exist and are publicly accessible.
+- For YouTube videos, ONLY use channel or playlist URLs, never individual video URLs
+  (individual video IDs go dead; channels stay alive).
+  Format: https://www.youtube.com/@ChannelName or https://www.youtube.com/c/ChannelName
+- For official docs, use the ROOT or SECTION page, never a deep sub-page that may move.
+  Good: https://learn.microsoft.com/en-us/azure/
+  Bad:  https://learn.microsoft.com/en-us/azure/some/deeply/nested/2019/page
+- ONLY use these trusted domains:
+  * learn.microsoft.com, docs.aws.amazon.com, cloud.google.com/docs
+  * youtube.com (channel/playlist URLs only)
+  * coursera.org, edx.org, udemy.com (course root pages only)
+  * developers.google.com, developer.mozilla.org
+  * github.com (official org repos only, e.g. github.com/microsoft or github.com/aws)
+  * freecodecamp.org, kaggle.com/learn
+- If you are not 100% sure a URL is valid and live, use the homepage of the trusted
+  domain instead (e.g. https://learn.microsoft.com/en-us/training/).
+- NEVER invent or guess URLs. NEVER use URLs from memory that might be outdated.
 
-For every resource you select, explain WHY it fits this specific gap.
+Prioritise resources in this order:
+1. Official documentation (learn.microsoft.com, docs.aws.amazon.com, etc.)
+2. Official YouTube channels of the technology provider
+3. Well-known course platforms (Coursera, edX, freeCodeCamp)
+4. Official GitHub repos
 
 Output valid JSON only:
 {
   "by_gap": {
     "<concept_name>": [
       {
-        "title": "string",
-        "url": "string",
+        "title": "string — descriptive title of the resource",
+        "url": "string — verified URL following the rules above",
         "resource_type": "official_docs|video|practice|article|book",
-        "relevance_reason": "why this closes the gap",
+        "relevance_reason": "why this resource directly closes this gap",
         "estimated_hours": 2.5
       }
     ]
