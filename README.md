@@ -16,10 +16,10 @@ You fill in your **goal**, **deadline**, and **quiz scores** per topic. Curricul
 
 1. Diagnoses exactly where your knowledge gaps are and how severe each one is
 2. Plans a week-by-week milestone sequence that closes every gap in order
-3. Curates the best learning resources per gap and adjusts pacing to your available hours — simultaneously
+3. Curates the best learning resources per gap — **grounded in Azure AI Search (Foundry IQ)** so links are real — and adjusts pacing to your available hours, simultaneously
 4. Verifies the plan is logically sound, corrects it if needed, then returns it
 
-The result is a fully reasoned, verified, personalized study board — rendered in a Pinterest-style Next.js UI.
+The result is a fully reasoned, verified, **grounded** study board — rendered in a Pinterest-style Next.js UI, with every agent's reasoning surfaced so you can see *why* each step is there.
 
 ---
 
@@ -70,13 +70,20 @@ If the Verifier flags issues, GoalPlanner and PaceReasoner re-run once with the 
 
 ---
 
-## Microsoft IQ integration
+## 💡 Microsoft IQ integration — Foundry IQ
 
-This project uses **Foundry IQ** — the agentic intelligence layer from Azure AI Foundry:
+CurriculumMind is built on **Foundry IQ**, the agentic intelligence layer of Azure AI Foundry. Foundry IQ is about *agentic knowledge retrieval* — connecting sources, enforcing grounding, and delivering **cited answers that reduce hallucination**. CurriculumMind uses it for exactly that:
 
-- All 5 agents connect to a hosted `gpt-4.1-mini` deployment via `FoundryChatClient`
-- `ContentCurator` uses **Azure AI Search** for grounded, cited resource retrieval
-- `DefaultAzureCredential` in dev, `ManagedIdentityCredential` in production — no hardcoded secrets
+| Foundry IQ capability | How CurriculumMind uses it |
+|---|---|
+| **Agentic model reasoning** | All 5 agents run on a hosted model via `FoundryChatClient` (Azure AI Foundry), each performing a distinct reasoning step in the pipeline |
+| **Grounded knowledge retrieval** | `ContentCurator` retrieves real learning resources from an **Azure AI Search** index — the agent prefers indexed, verified sources over its own knowledge |
+| **Cited, hallucination-resistant answers** | Every recommended resource carries a **real, working URL** from the grounded index; agents are constrained to trusted domains so links don't 404 |
+| **Secure, enterprise-ready auth** | `ManagedIdentityCredential` in production / `DefaultAzureCredential` in dev — no hardcoded secrets |
+
+**The result:** plans are personalized by multi-step agent reasoning *and* grounded in real, retrievable resources — the core promise of Foundry IQ.
+
+> 🌱 Seed the search index with `python backend/scripts/seed_search_index.py` to enable grounded retrieval. Without it, the system still runs by falling back to model-generated resources.
 
 ---
 
