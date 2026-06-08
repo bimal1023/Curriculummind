@@ -93,7 +93,7 @@ curriculummind/
 │   │   ├── pace_reasoner.py
 │   │   └── verifier.py
 │   ├── orchestrator/
-│   │   └── pipeline.py            # Async pipeline — parallel stage 3 + correction pass
+│   │   └── pipeline.py            # Async pipeline — parallel stage 3 + reasoning trace
 │   ├── api/
 │   │   ├── app.py                 # FastAPI factory + typed exception handlers
 │   │   ├── routers/               # /health, /api/v1/plans
@@ -106,7 +106,9 @@ curriculummind/
 │   │   └── logging.py             # structlog JSON/console
 │   ├── services/
 │   │   ├── foundry_client.py      # @lru_cache FoundryChatClient factory
-│   │   └── search/azure_search.py # Azure AI Search wrapper
+│   │   └── search/azure_search.py # Azure AI Search wrapper (graceful fallback)
+│   ├── scripts/
+│   │   └── seed_search_index.py   # Creates + seeds the Azure Search index
 │   ├── tests/
 │   │   ├── unit/                  # Agent-level (fully mocked, no Azure needed)
 │   │   └── integration/           # Pipeline-level (fully mocked)
@@ -114,9 +116,22 @@ curriculummind/
 │   ├── data/sample_profiles/      # Sample inputs
 │   └── main.py
 └── frontend/
-    ├── app/                       # Next.js app router
-    ├── components/                # GapCard, MilestoneCard, ResourceCard, etc.
-    └── lib/api.js                 # Single fetch helper → /api/v1/plans/generate
+    ├── app/
+    │   ├── page.jsx               # setup → loading → results state machine
+    │   ├── layout.jsx             # fonts + metadata
+    │   ├── icon.svg               # CM favicon
+    │   └── opengraph-image.jsx    # dynamic social share card
+    ├── components/
+    │   ├── SetupForm.jsx          # goal + diagnostic form
+    │   ├── LoadingOverlay.jsx     # animated 5-agent progress
+    │   ├── Results.jsx            # assembles the study board
+    │   ├── ReasoningTrace.jsx     # multi-step agent reasoning panel
+    │   ├── MilestoneCard.jsx      # weekly milestones + tick-off checklist
+    │   ├── GapCard.jsx · ResourceCard.jsx · CopyPlanButton.jsx · Reveal.jsx …
+    └── lib/
+        ├── api.js                 # fetch helper → /api/v1/plans/generate
+        ├── exportPlan.js          # plan → Markdown export
+        └── progress.js            # checklist progress (localStorage)
 ```
 
 ---
@@ -147,6 +162,10 @@ cp .env.example .env
 
 # Authenticate with Azure
 az login
+
+# (Optional) Seed Azure AI Search with real learning resources.
+# Skip this and ContentCurator falls back to model-generated resources.
+python scripts/seed_search_index.py
 
 # Run
 python main.py
