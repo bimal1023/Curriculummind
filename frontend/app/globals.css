@@ -9,8 +9,9 @@
   body {
     @apply bg-pin-cream text-pin-ink font-body antialiased;
     background-image:
-      radial-gradient(circle at 12% 18%, rgba(230, 0, 35, 0.05), transparent 38%),
-      radial-gradient(circle at 88% 8%, rgba(230, 0, 35, 0.04), transparent 32%);
+      radial-gradient(circle at 12% 14%, rgba(230, 0, 35, 0.06), transparent 36%),
+      radial-gradient(circle at 88% 6%, rgba(230, 0, 35, 0.05), transparent 30%),
+      radial-gradient(circle at 50% 100%, rgba(230, 0, 35, 0.035), transparent 45%);
     background-attachment: fixed;
   }
 }

@@ -219,13 +219,13 @@ export default function SetupForm({ onSubmit, error }) {
                 className="grid grid-cols-12 items-center gap-2 rounded-2xl bg-pin-cream p-2"
               >
                 <input
-                  className={`${field} col-span-6`}
+                  className={`${field} col-span-12 sm:col-span-6`}
                   value={a.topic}
                   onChange={(e) => setAssessment(i, "topic", e.target.value)}
                   placeholder="Topic, e.g. Cloud concepts"
                   required
                 />
-                <div className="col-span-3 flex items-center gap-1 rounded-2xl border border-pin-line bg-white px-3">
+                <div className="col-span-5 flex items-center gap-1 rounded-2xl border border-pin-line bg-white px-3 sm:col-span-3">
                   <input
                     type="number"
                     min={0}
@@ -236,7 +236,7 @@ export default function SetupForm({ onSubmit, error }) {
                   />
                   <span className="text-xs font-bold text-pin-muted">%</span>
                 </div>
-                <div className="col-span-2 flex items-center gap-1 rounded-2xl border border-pin-line bg-white px-3">
+                <div className="col-span-5 flex items-center gap-1 rounded-2xl border border-pin-line bg-white px-3 sm:col-span-2">
                   <input
                     type="number"
                     min={1}
@@ -252,7 +252,7 @@ export default function SetupForm({ onSubmit, error }) {
                   type="button"
                   onClick={() => removeAssessment(i)}
                   disabled={form.assessment_results.length === 1}
-                  className="col-span-1 grid h-9 w-9 place-items-center justify-self-center rounded-full text-pin-muted transition hover:bg-pin-red/10 hover:text-pin-red disabled:opacity-30"
+                  className="col-span-2 grid h-9 w-9 place-items-center justify-self-center rounded-full text-pin-muted transition hover:bg-pin-red/10 hover:text-pin-red disabled:opacity-30 sm:col-span-1"
                   aria-label="Remove topic"
                 >
                   ✕

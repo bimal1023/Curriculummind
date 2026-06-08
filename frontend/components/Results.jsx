@@ -8,6 +8,7 @@ import ResourceCard from "./ResourceCard";
 import SectionHeading from "./SectionHeading";
 import ReasoningTrace from "./ReasoningTrace";
 import CopyPlanButton from "./CopyPlanButton";
+import Reveal from "./Reveal";
 import { loadChecked, saveChecked, objectiveKey } from "@/lib/progress";
 
 function VerificationBanner({ verification }) {
@@ -104,7 +105,7 @@ export default function Results({ plan, onReset }) {
   return (
     <div className="relative z-[2] mx-auto max-w-6xl px-5 py-10">
       {/* Bar */}
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <Logo />
         <div className="flex items-center gap-2">
           <CopyPlanButton plan={plan} />
@@ -147,14 +148,14 @@ export default function Results({ plan, onReset }) {
 
       {/* Reasoning trace — the multi-step thinking behind the plan */}
       {plan.reasoning_trace?.length > 0 && (
-        <section className="mt-12">
+        <Reveal className="mt-12">
           <ReasoningTrace trace={plan.reasoning_trace} />
-        </section>
+        </Reveal>
       )}
 
       {/* Gaps — masonry board */}
       {gaps.length > 0 && (
-        <section className="mt-16">
+        <Reveal className="mt-16">
           <SectionHeading
             kicker="Diagnosis"
             title="Where you're losing points"
@@ -171,12 +172,12 @@ export default function Results({ plan, onReset }) {
               {plan.gap_analysis.reasoning}
             </p>
           )}
-        </section>
+        </Reveal>
       )}
 
       {/* Milestones — timeline with tick-off checklist */}
       {milestones.length > 0 && (
-        <section className="mt-16">
+        <Reveal className="mt-16">
           <SectionHeading
             kicker="The plan"
             title="Your week-by-week path"
@@ -244,12 +245,12 @@ export default function Results({ plan, onReset }) {
               </ul>
             </div>
           )}
-        </section>
+        </Reveal>
       )}
 
       {/* Resources — grouped boards */}
       {Object.keys(byGap).length > 0 && (
-        <section className="mt-16">
+        <Reveal className="mt-16">
           <SectionHeading
             kicker="Curated"
             title="Resources, pinned per gap"
@@ -274,7 +275,7 @@ export default function Results({ plan, onReset }) {
               </div>
             ))}
           </div>
-        </section>
+        </Reveal>
       )}
 
       <footer className="mt-20 border-t border-pin-line pt-8 text-center">
