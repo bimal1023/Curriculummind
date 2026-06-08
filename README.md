@@ -27,7 +27,7 @@ The result is a fully reasoned, verified, personalized study board — rendered 
 
 > 📹 **[Watch the demo video](#)**
 
-![CurriculumMind UI](https://via.placeholder.com/800x400?text=CurriculumMind+Study+Board)
+![CurriculumMind — pin your goal and build a study board](docs/screenshot-setup.png)
 
 ---
 
